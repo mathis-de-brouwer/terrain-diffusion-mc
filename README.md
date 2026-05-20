@@ -159,3 +159,23 @@ The built jar appears in `java/build/`. Rename it to `onnxruntime-dml.jar` and p
 While modifying the AI terrain itself is quite complex, the integration with Minecraft biomes is extremely simple. The model outputs elevation + 4 climate variables, and this is converted to Minecraft biomes with hand-written rules. This is the most immediate way to improve the quality of the terrain and is relatively easy, but takes time to get realistic. The entire biome classifier is [only 250 lines](https://github.com/xandergos/terrain-diffusion-mc/blob/master/src/main/java/com/github/xandergos/terraindiffusionmc/pipeline/BiomeClassifier.java).
 
 The terrain diversity far outpaces the biome diversity and there's a real opportunity to close that gap. I'm hoping someone goes crazy with it.
+
+### Current biome palette
+The classifier has been expanded beyond the original ~12 biomes to cover the full range of Cobblemon spawn tags and improve climate fidelity:
+
+Vanilla biomes (~35): full coverage of forests, jungles, taigas, swamps, badlands, mountains, snowy biomes, beaches, and oceans — including birch forests, dark forests, mangrove swamps, bamboo jungles, cherry groves, old-growth variants, and more.
+Custom TD biomes (3): forest_sparse, taiga_sparse, snowy_taiga_sparse — transition biomes defined by the mod itself for intermediate tree coverage zones.
+Terralith biomes (~25, optional): if the Terralith datapack is loaded before world creation, the classifier will output Terralith biome IDs in matching climate zones (e.g. terralith:yellowstone for hot arid highlands, terralith:amethyst_rainforest for dense tropical zones). If Terralith is not present, each ID transparently falls back to its vanilla equivalent — the same jar works either way with no crashes.
+
+Adding or changing biomes
+The short IDs in BiomeClassifier.java are arbitrary internal keys — the numbers have no special meaning. To add a new biome:
+
+Declare a new static final short constant in BiomeClassifier.java with any unused number.
+Add the matching map.put(...) entry in TerrainDiffusionBiomeSource.requireBiomeIdMap(), pointing to its RegistryKey<Biome>.
+For mod/datapack biomes that may not always be present, use the existing putOptional() helper — it resolves to the biome if registered, or falls back to a vanilla key if not.
+Assign the constant in the decision tree inside BiomeClassifier.classify() where the climate conditions fit.
+
+Using Terralith with Terrain Diffusion (experimental, untested)
+Terralith compatibility via datapack is theoretically possible but has not been confirmed. The Terralith mod version (which uses TerraBlender) does not work — TD replaces the vanilla world generator entirely, so TerraBlender never runs and those biome IDs are never registered.
+The datapack version is a different story: it injects biome definitions directly into Minecraft's registry rather than going through TerraBlender, so the registry entries should exist at world load time and should be queryable by TD's biome source. If they are, the classifier will output Terralith biomes in matching climate zones. If they aren't, putOptional() will silently fall back to vanilla equivalents — no crashes either way.
+If you test this, add the Terralith datapack before generating the world (registry entries must exist at world creation time) and check whether Terralith biomes actually appear in-game. Results and feedback welcome.
