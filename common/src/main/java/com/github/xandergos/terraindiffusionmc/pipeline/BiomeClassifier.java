@@ -38,7 +38,6 @@ public final class BiomeClassifier {
     static final short WINDSWEPT_HILLS = 19, JUNGLE = 23, BADLANDS = 26, MEADOW = 29;
     static final short GROVE = 31, SNOWY_SLOPES = 32, FROZEN_PEAKS = 33, STONY_PEAKS = 35;
     static final short WARM_OCEAN = 41, OCEAN = 44, COLD_OCEAN = 46, FROZEN_OCEAN = 48;
-    static final short FOREST_SPARSE = 108, TAIGA_SPARSE = 115, SNOWY_TAIGA_SPARSE = 116;
 
     // ── New vanilla biomes ───────────────────────────────────────────────────
     static final short BIRCH_FOREST = 50, DARK_FOREST = 51, FLOWER_FOREST = 52;
@@ -48,6 +47,7 @@ public final class BiomeClassifier {
     static final short OLD_GROWTH_PINE_TAIGA = 62, OLD_GROWTH_SPRUCE_TAIGA = 63;
     static final short OLD_GROWTH_BIRCH_FOREST = 64, SAVANNA_PLATEAU = 65;
 
+    /*
     // ── Terralith biomes (optional — only used if datapack is loaded) ────────
     static final short T_YELLOWSTONE = 200, T_SIBERIAN_TAIGA = 201, T_MOONLIGHT_GROVE = 202;
     static final short T_LAVENDER_FOREST = 203, T_SAKURA_GROVE = 204, T_BLOOMING_VALLEY = 205;
@@ -58,6 +58,7 @@ public final class BiomeClassifier {
     static final short T_EMERALD_PEAKS = 218, T_SCARLET_MOUNTAINS = 219;
     static final short T_AMETHYST_RAINFOREST = 220, T_UNDERGROUND_JUNGLE = 221;
     static final short T_ORCHID_SWAMP = 222, T_WARM_OCEAN_T = 223, T_LUSH_STACKS = 224;
+    */
     /**
      * Classify biomes for a grid of pixels.
      *
@@ -200,32 +201,32 @@ public final class BiomeClassifier {
 
                     } else if (hasSnow) {
                         if (treesNone)                       biome = SNOWY_SLOPES;
-                        else if (treesSparse)                biome = T_ALPINE_GROVE;      // Terralith → fallback GROVE
-                        else if (treesForest)                biome = SNOWY_TAIGA_SPARSE;
+                        else if (treesSparse)                biome = GROVE;              // Terralith alpine grove fallback
+                        else if (treesForest)                biome = SNOWY_TAIGA;
                         else                                 biome = SNOWY_TAIGA;
 
                     } else if (treesNone) {
-                        if (hot || warm)                     biome = T_ROCKY_MOUNTAINS;   // → STONY_PEAKS
+                        if (hot || warm)                     biome = STONY_PEAKS;         // Terralith rocky mountains fallback
                         else if (barren && (frozen || cold)) biome = WINDSWEPT_HILLS;
                         else if (cool || temperate)          biome = MEADOW;
                         else                                 biome = SNOWY_SLOPES;
 
                     } else if (treesSparse) {
                         if (frozen || cold)                  biome = OLD_GROWTH_PINE_TAIGA;
-                        else if (cool)                       biome = T_ALPINE_GROVE;      // → GROVE
+                        else if (cool)                       biome = GROVE;              // Terralith alpine grove fallback
                         else if (temperate)                  biome = WINDSWEPT_FOREST;
                         else                                 biome = WINDSWEPT_SAVANNA;
 
                     } else if (treesForest) {
                         if (frozen || cold)                  biome = SNOWY_TAIGA;
                         else if (cool)                       biome = OLD_GROWTH_SPRUCE_TAIGA;
-                        else if (temperate)                  biome = T_EMERALD_PEAKS;     // → FOREST
+                        else if (temperate)                  biome = FOREST;             // Terralith emerald peaks fallback
                         else                                 biome = WINDSWEPT_FOREST;
 
                     } else { // dense / rainforest at altitude
                         if (frozen || cold)                  biome = SNOWY_TAIGA;
                         else if (cool)                       biome = TAIGA;
-                        else if (temperate)                  biome = T_SCARLET_MOUNTAINS; // → FOREST
+                        else if (temperate)                  biome = FOREST;             // Terralith scarlet mountains fallback
                         else                                 biome = JUNGLE;
                     }
 
@@ -236,19 +237,19 @@ public final class BiomeClassifier {
                     if (hasSnow && treesNone) {
                         biome = SNOWY_PLAINS;
                     } else if (hasSnow) {
-                        if (treesSparse)                     biome = T_SNOWY_MAPLE_FOREST; // → SNOWY_TAIGA
-                        else if (treesForest)                biome = SNOWY_TAIGA_SPARSE;
+                        if (treesSparse)                     biome = SNOWY_TAIGA;         // Terralith snowy maple forest fallback
+                        else if (treesForest)                biome = SNOWY_TAIGA;
                         else                                 biome = SNOWY_TAIGA;
 
                     // No trees
                     } else if (treesNone) {
-                        if (hot && aridity < 0.15f)          biome = T_ANCIENT_SANDS;     // → BADLANDS/DESERT
-                        else if (hot && aridity < 0.35f)     biome = T_DESERT_CANYON;     // → DESERT
+                        if (hot && aridity < 0.15f)          biome = DESERT;              // Terralith ancient sands fallback
+                        else if (hot && aridity < 0.35f)     biome = DESERT;              // Terralith desert canyon fallback
                         else if (hot)                        biome = DESERT;
-                        else if (warm && aridity < 0.2f)     biome = T_SAVANNA_BADLANDS;  // → BADLANDS
-                        else if (warm && aridity < 0.45f)    biome = T_ARID_HIGHLANDS;    // → SAVANNA
-                        else if (warm && aridity < 0.65f)    biome = T_BRUSHLAND;         // → SAVANNA/PLAINS
-                        else if (warm)                       biome = T_HIGHLANDS_PLAINS;  // → PLAINS
+                        else if (warm && aridity < 0.2f)     biome = BADLANDS;            // Terralith savanna badlands fallback
+                        else if (warm && aridity < 0.45f)    biome = SAVANNA;             // Terralith arid highlands fallback
+                        else if (warm && aridity < 0.65f)    biome = SAVANNA;             // Terralith brushland fallback
+                        else if (warm)                       biome = PLAINS;             // Terralith highlands plains fallback
                         else if (temperate && precip > 600f) biome = MEADOW;
                         else if (temperate)                  biome = PLAINS;
                         else if (cool)                       biome = PLAINS;
@@ -257,22 +258,22 @@ public final class BiomeClassifier {
                     // Sparse trees
                     } else if (treesSparse) {
                         if (hot && precip > 1800f)           biome = SPARSE_JUNGLE;
-                        else if (hot)                        biome = T_HOT_SHRUBLAND;     // → SAVANNA
+                        else if (hot)                        biome = SAVANNA;             // Terralith hot shrubland fallback
                         else if (warm && aridity < 0.35f)    biome = SAVANNA_PLATEAU;
                         else if (warm && aridity < 0.6f)     biome = SAVANNA;
-                        else if (warm)                       biome = FOREST_SPARSE;
+                        else if (warm)                       biome = FOREST;
                         else if (temperate && precip > 800f) biome = BIRCH_FOREST;
-                        else if (temperate)                  biome = FOREST_SPARSE;
-                        else if (cool)                       biome = TAIGA_SPARSE;
-                        else                                 biome = SNOWY_TAIGA_SPARSE;
+                        else if (temperate)                  biome = FOREST;
+                        else if (cool)                       biome = TAIGA;
+                        else                                 biome = SNOWY_TAIGA;
 
                     // Forest
                     } else if (treesForest) {
                         if (hot && precip > 2000f)           biome = JUNGLE;
                         else if (hot)                        biome = JUNGLE;
-                        else if (warm && lowland && precip > 1200f) biome = T_ORCHID_SWAMP; // → SWAMP
-                        else if (warm && precip > 900f)      biome = T_LUSH_DESERT;       // → FOREST (wet warm)
-                        else if (warm)                       biome = FOREST_SPARSE;
+                        else if (warm && lowland && precip > 1200f) biome = SWAMP;         // Terralith orchid swamp fallback
+                        else if (warm && precip > 900f)      biome = FOREST;              // Terralith lush desert fallback
+                        else if (warm)                       biome = FOREST;
                         else if (temperate && precip > 1100f) biome = DARK_FOREST;
                         else if (temperate && precip > 600f) biome = FOREST;
                         else if (temperate)                  biome = BIRCH_FOREST;
@@ -282,15 +283,15 @@ public final class BiomeClassifier {
 
                     // Dense
                     } else if (treesDense) {
-                        if (hot && precip > 2500f)           biome = T_AMETHYST_RAINFOREST; // → JUNGLE (magical)
+                        if (hot && precip > 2500f)           biome = JUNGLE;              // Terralith amethyst rainforest fallback
                         else if (hot)                        biome = JUNGLE;
                         else if (warm && lowland)            biome = MANGROVE_SWAMP;
                         else if (warm && precip > 1000f)     biome = BAMBOO_JUNGLE;
                         else if (warm)                       biome = FOREST;
                         else if (temperate && precip > 1200f) biome = DARK_FOREST;
-                        else if (temperate && precip > 700f) biome = T_LAVENDER_FOREST;   // → FOREST (floral/magical)
+                        else if (temperate && precip > 700f) biome = FOREST;             // Terralith lavender forest fallback
                         else if (temperate)                  biome = FOREST;
-                        else if (cool && precip > 600f)      biome = T_MOONLIGHT_GROVE;   // → TAIGA (magical)
+                        else if (cool && precip > 600f)      biome = TAIGA;              // Terralith moonlight grove fallback
                         else if (cool)                       biome = TAIGA;
                         else                                 biome = SNOWY_TAIGA;
 
@@ -298,11 +299,11 @@ public final class BiomeClassifier {
                     } else {
                         if (hot || (warm && temp >= 18f && tStd < 5f)) biome = JUNGLE;
                         else if (warm && lowland)            biome = MANGROVE_SWAMP;
-                        else if (warm && precip > 1500f)     biome = T_AMETHYST_RAINFOREST;
+                        else if (warm && precip > 1500f)     biome = JUNGLE;              // Terralith amethyst rainforest fallback
                         else if (temperate && precip > 1400f) biome = DARK_FOREST;
-                        else if (temperate && precip > 800f) biome = T_BLOOMING_VALLEY;   // → FOREST (floral)
+                        else if (temperate && precip > 800f) biome = FOREST;             // Terralith blooming valley fallback
                         else if (lowland)                    biome = SWAMP;
-                        else if (cool || cold)              biome = T_SIBERIAN_TAIGA;     // → TAIGA
+                        else if (cool || cold)              biome = TAIGA;              // Terralith siberian taiga fallback
                         else                                 biome = FOREST;
                     }
                 }
